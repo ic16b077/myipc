@@ -45,17 +45,16 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 
 					*/
 				}
-
 				if (errno != 0 && ringbuffer_size == 0)
 				{
 					fprintf(stderr, "\n"); // Fehlerbehandlung ergänzen
 					exit(EXIT_FAILURE);
 				}
-
 				if (*endptr != '\0') {
 					fprintf(stderr, "\n"); // Fehlerbehandlung ergänzen
 					exit(EXIT_FAILURE);
 				}
+
 				break;
 			/* default: */
 				/* Fehlerbehandlung ergänzen */
