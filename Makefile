@@ -29,7 +29,7 @@ DOXYGEN=doxygen
 
 LIB_PATH?=/usr/local/lib
 
-OBJECTS=lib.o
+OBJECTS=myipclib.o
 
 EXCLUDE_PATTERN=footrulewidth
 
@@ -48,7 +48,7 @@ all: sender empfaenger
 
 sender: $(OBJECTS) sender.o
 	$(CC) $(CFLAGS) -o $@ $^ -L$(LIB_PATH) -lsem182
-		
+
 empfaenger: $(OBJECTS) empfaenger.o
 	$(CC) $(CFLAGS) -o $@ $^ -L$(LIB_PATH) -lsem182
 
