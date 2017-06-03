@@ -12,6 +12,10 @@ int get_ringbuffer_size(int argc, char* argv[]) {
         {
                 program_name = argv[0];
         }
+	else
+	{
+		exit(EXIT_FAILURE); // Fehlerbehandlung?
+	}
 
 	if (argc < 2)
 	{
