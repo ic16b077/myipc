@@ -31,7 +31,7 @@
 
 /**
  *
- * \brief Implementaion of a receiver program
+ * \brief Implementaion of a sender program
  *
  * This is the main entry point for any C program.
  *
