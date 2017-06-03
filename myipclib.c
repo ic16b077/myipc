@@ -19,8 +19,8 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 
 	if (argc < 2)
 	{
-		printf("%s: ringbuffersize must be specified\n", program_name);
-		printf("usage: %s -m <ring buffer size>\n", program_name);
+		fprintf(stderr, "%s: ringbuffersize must be specified\n", program_name);
+		fprintf(stderr, "usage: %s -m <ring buffer size>\n", program_name);
 		exit(EXIT_FAILURE);
 	}
 
@@ -30,8 +30,30 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 		{
 			case 'm':
 				ringbuffer_size = strtol(optarg, &endptr, base);
-				if (1 == 2) // Fehlerbehandlung ergänzen
+
+				/* Fehlerbehandlung für strtol */
+				if (errno == ERANGE && (ringbuffer_size == LONG_MAX || ringbuffer_size == LONG_MIN))
 				{
+					fprintf(); // Fehlerbehandlung ergänzen
+					exit(EXIT_FAILURE);
+					/*
+
+					FEHLERMELDUNG VON bic-empfaenger -m 9999999999999999999999999999999999999
+
+					bic-empfaenger: numeric overflow when converting ringbuffersize to long long value (value 99999999999999999999999999999999999999999 exceeds 9223372036854775807)
+					usage: bic-empfaenger [-h] -m <ring buffer size>
+
+					*/
+				}
+
+				if (errno != 0 && ringbuffer_size == 0)
+				{
+					fprintf(stderr, "\n"); // Fehlerbehandlung ergänzen
+					exit(EXIT_FAILURE);
+				}
+
+				if (*endptr != '\0') {
+					fprintf(stderr, "\n"); // Fehlerbehandlung ergänzen
 					exit(EXIT_FAILURE);
 				}
 				break;
