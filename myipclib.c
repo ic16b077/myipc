@@ -34,7 +34,7 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 				/* Fehlerbehandlung für strtol */
 				if (errno == ERANGE && (ringbuffer_size == LONG_MAX || ringbuffer_size == LONG_MIN))
 				{
-					fprintf(); // Fehlerbehandlung ergänzen
+					fprintf(stderr, "\n"); // Fehlerbehandlung ergänzen
 					exit(EXIT_FAILURE);
 					/*
 
