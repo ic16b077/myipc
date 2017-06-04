@@ -47,6 +47,7 @@ int main(int argc, char* argv[]) {
 	long long ringbuffer_size;
 	int semid_sender;
 	int semid_empfaenger;
+	int shmid;
 
 	ringbuffer_size = get_ringbuffer_size(argc, argv);
         printf("ringbuffer_size = %lld\n", ringbuffer_size);
@@ -57,8 +58,20 @@ int main(int argc, char* argv[]) {
         semid_sender = get_semid(ringbuffer_size);
         printf("semid_sender = %d\n", semid_sender);
 
+	shmid = get_shmid(ringbuffer_size);
+	printf("shmid = %d\n", shmid);
+
+
+	/* Semaphoren löschen */
 	semrm(semid_empfaenger);
 	semrm(semid_sender);
+
+	/* Shared memory löschen - BEACHTEN: Es sollte nur ein Prozeß das Shared Memory Segment entfernen */
+	if (shmctl(shmid, IPC_RMID, NULL) == -1)
+	{
+		fprintf(stderr, "%s: %s\n", "SPAETER DURCH PROGRAMMNAME ERSETZEN", strerror(errno));
+	}
+
 
 	return EXIT_SUCCESS;
 }

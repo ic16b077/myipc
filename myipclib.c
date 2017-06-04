@@ -132,7 +132,7 @@ static void usage(char* program_name)
  *
  * \brief Function to create a semaphore and return its id
  *
- * \return semaphore_id
+ * \return semid
  * \retval id of the created semaphore
  *
  */
@@ -159,6 +159,22 @@ int get_semid(int initval)
 	return semid;
 }
 
+/**
+ *
+ * \brief Function to create a shared memory and return its id
+ *
+ * \return shmid
+ * \retval id of the created shared memory
+ *
+ */
+int get_shmid(size_t size)
+{
+	int shmid = 0;
+
+	shmid = shmget(KEY, size * sizeof(int), 0660 | IPC_CREAT);
+
+	return shmid;
+}
 /*
  * =================================================================== eof ==
  */
