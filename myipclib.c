@@ -21,6 +21,7 @@
  * --------------------------------------------------------------- defines --
  */
 #define RINGBUFFER_SIZE_MAX 200
+#define KEY getuid() * 1000
 
 /*
  * ------------------------------------------------------------- functions --
@@ -33,7 +34,7 @@ static void usage(char* program_name);
 
 /**
  *
- * \brief Helper function to get the size of the ringbuffer
+ * \brief Function to get the size of the ringbuffer
  *
  * \param argc argument count
  * \param argv argument vector
@@ -125,6 +126,37 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 static void usage(char* program_name)
 {
     fprintf(stderr, "usage: %s -m <ring buffer size>\n", program_name);
+}
+
+/**
+ *
+ * \brief Function to create a semaphore and return its id
+ *
+ * \return semaphore_id
+ * \retval id of the created semaphore
+ *
+ */
+int get_semid(int initval)
+{
+	static int count = 0;
+	int semid = 0;
+
+	if ((semid = seminit(KEY + count, 0660, initval)) == -1)
+	{
+		if (errno == EEXIST)
+		{
+			semid = semgrab(KEY + count);
+			if(semid == -1)
+			{
+				fprintf(stderr, "?\n"); // Fehlerbehandlung ergänzen und alles wieder löschen
+				exit(EXIT_FAILURE);
+			}
+		}
+	}
+
+	count++;
+
+	return semid;
 }
 
 /*

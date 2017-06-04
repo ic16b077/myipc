@@ -45,10 +45,20 @@
  */
 int main(int argc, char* argv[]) {
 	long long ringbuffer_size;
+	int semid_sender;
+	int semid_empfaenger;
 
 	ringbuffer_size = get_ringbuffer_size(argc, argv);
+        printf("ringbuffer_size = %lld\n", ringbuffer_size);
 
-        printf("%lld\n", ringbuffer_size);
+	semid_empfaenger = get_semid(0);
+	printf("semid_empfaenger = %d\n", semid_empfaenger);
+
+        semid_sender = get_semid(ringbuffer_size);
+        printf("semid_sender = %d\n", semid_sender);
+
+	semrm(semid_empfaenger);
+	semrm(semid_sender);
 
 	return EXIT_SUCCESS;
 }

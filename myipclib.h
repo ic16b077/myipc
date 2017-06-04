@@ -28,11 +28,13 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <string.h>
+#include <sem182.h>
 
 /*
  * ------------------------------------------------------------- functions --
  */
 extern long long get_ringbuffer_size(int argc, char* argv[]);
+extern int get_semid(int initval);
 
 #endif
 
