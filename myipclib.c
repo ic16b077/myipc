@@ -1,10 +1,50 @@
+/**
+ * @file myipc.c
+ * Betriebssysteme myipc File.
+ * Beispiel 3
+ *
+ * @author Aleksandar Pavlovic, Johanna Hoffmann, Michael Käfer
+ * @date 2017/06/03
+ *
+ * @version 1
+ *
+ * @todo Review
+ *
+ */
 
+/*
+ * -------------------------------------------------------------- includes --
+ */
 #include "myipclib.h"
 
+/*
+ * --------------------------------------------------------------- defines --
+ */
+#define RINGBUFFER_SIZE_MAX 200
+
+/*
+ * ------------------------------------------------------------- functions --
+ */
+
+/*
+ * --------------------------------------------------------------- globals --
+ */
+
+/**
+ *
+ * \brief Helper function to get the size of the ringbuffer
+ *
+ * \param argc argument count
+ * \param argv argument vector
+ *
+ * \return size of the ringbuffer
+ * \retval between 1 and RINGBUFFER_SIZE_MAX
+ *
+ */
 int get_ringbuffer_size(int argc, char* argv[]) {
 	char* program_name;
         int option;
-	int ringbuffer_size = 0;
+	long long ringbuffer_size = 0;
 	char* endptr;
 	int base = 10;
 
@@ -29,21 +69,14 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 		switch (option)
 		{
 			case 'm':
-				ringbuffer_size = strtol(optarg, &endptr, base);
+				ringbuffer_size = strtoll(optarg, &endptr, base);
 
 				/* Fehlerbehandlung für strtol */
-				if (errno == ERANGE && (ringbuffer_size == LONG_MAX || ringbuffer_size == LONG_MIN))
+				if (errno == ERANGE && (ringbuffer_size == LLONG_MAX || ringbuffer_size == LLONG_MIN))
 				{
-					fprintf(stderr, "\n"); // Fehlerbehandlung ergänzen
+					fprintf(stderr, "%s: numeric overflow when converting ringbuffersize to long long value (value %s exceeds %lld)\n", program_name, optarg, LLONG_MAX);
+					fprintf(stderr, "usage: %s -m <ring buffer size>\n", program_name);
 					exit(EXIT_FAILURE);
-					/*
-
-					FEHLERMELDUNG VON bic-empfaenger -m 9999999999999999999999999999999999999
-
-					bic-empfaenger: numeric overflow when converting ringbuffersize to long long value (value 99999999999999999999999999999999999999999 exceeds 9223372036854775807)
-					usage: bic-empfaenger [-h] -m <ring buffer size>
-
-					*/
 				}
 				if (errno != 0 && ringbuffer_size == 0)
 				{
@@ -55,6 +88,13 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 					exit(EXIT_FAILURE);
 				}
 
+				/**/
+				if (ringbuffer_size < 1 || ringbuffer_size > RINGBUFFER_SIZE_MAX) {
+                                        fprintf(stderr, "%s: ringbuffersize must be between 1 and %d (value %lld is not possible)\n", program_name, RINGBUFFER_SIZE_MAX, ringbuffer_size);
+                                        fprintf(stderr, "usage: %s -m <ring buffer size>\n", program_name);
+                                        exit(EXIT_FAILURE);
+				}
+
 				break;
 			/* default: */
 				/* Fehlerbehandlung ergänzen */
@@ -63,3 +103,7 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 
         return ringbuffer_size;
 }
+
+/*
+ * =================================================================== eof ==
+ */
