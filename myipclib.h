@@ -32,7 +32,7 @@
 /*
  * ------------------------------------------------------------- functions --
  */
-extern int get_ringbuffer_size(int argc, char* argv[]);
+extern long long get_ringbuffer_size(int argc, char* argv[]);
 
 #endif
 

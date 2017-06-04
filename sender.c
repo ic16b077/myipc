@@ -44,11 +44,11 @@
  *
  */
 int main(int argc, char* argv[]) {
-	int ringbuffer_size;
+	long long ringbuffer_size;
 
 	ringbuffer_size = get_ringbuffer_size(argc, argv);
 
-        printf("%d\n", ringbuffer_size);
+        printf("%lld\n", ringbuffer_size);
 
 	return EXIT_SUCCESS;
 }

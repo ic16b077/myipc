@@ -42,7 +42,7 @@ static void usage(char* program_name);
  * \retval between 1 and RINGBUFFER_SIZE_MAX
  *
  */
-int get_ringbuffer_size(int argc, char* argv[]) {
+long long get_ringbuffer_size(int argc, char* argv[]) {
 	char* program_name;
         int option;
 	long long ringbuffer_size = 0;
