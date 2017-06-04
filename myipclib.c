@@ -49,15 +49,17 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 	char* endptr;
 	int base = 10;
 
+	/* Programmnamen holen */
         if (argv[0])
         {
                 program_name = argv[0];
         }
 	else
 	{
-		exit(EXIT_FAILURE); // Fehlerbehandlung?
+		exit(EXIT_FAILURE);
 	}
 
+	/* zu wenig Argumente */
 	if (argc < 2)
 	{
 		fprintf(stderr, "%s: ringbuffersize must be specified\n", program_name);
@@ -65,6 +67,13 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	/* zu viele Argumente */
+	if (argc > 3) {
+		usage(program_name);
+		exit(EXIT_FAILURE);
+	}
+
+	/* Optionen verarbeiten */
 	while ((option = getopt(argc, argv, "m:")) != -1)
 	{
 		switch (option)
@@ -81,7 +90,7 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 				}
 				if (errno != 0 && ringbuffer_size == 0)
 				{
-					fprintf(stderr, "\n"); // Fehlerbehandlung ergänzen
+                                        fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
 					exit(EXIT_FAILURE);
 				}
 				if (*endptr != '\0') {
@@ -98,8 +107,8 @@ int get_ringbuffer_size(int argc, char* argv[]) {
 				}
 
 				break;
-			/* default: */
-				/* Fehlerbehandlung ergänzen */
+			default:
+				exit(EXIT_FAILURE);
 		}
 	}
 
