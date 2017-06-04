@@ -148,9 +148,14 @@ int get_semid(int initval)
 			semid = semgrab(KEY + count);
 			if(semid == -1)
 			{
-				fprintf(stderr, "?\n"); // Fehlerbehandlung ergänzen und alles wieder löschen
+				fprintf(stderr, "%s: %s\n", "PROGRAMMNAME SPETERR ERGAENZEN", strerror(errno));
+				/* SEMAPHOREN LOESCHEN */
 				exit(EXIT_FAILURE);
 			}
+		}
+		else
+		{
+			fprintf(stderr, "%s: %s", "PROGRAMMNAME SPAETERR ERGAENZEN", strerror(errno));
 		}
 	}
 
