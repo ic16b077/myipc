@@ -26,11 +26,12 @@
 /*
  * ------------------------------------------------------------- functions --
  */
-static void usage(char* program_name);
+static void usage(void);
 
 /*
  * --------------------------------------------------------------- globals --
  */
+static char* program_name;
 
 /**
  *
@@ -44,7 +45,6 @@ static void usage(char* program_name);
  *
  */
 long long get_ringbuffer_size(int argc, char* argv[]) {
-	char* program_name;
         int option;
 	long long ringbuffer_size = 0;
 	char* endptr;
@@ -64,13 +64,13 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 	if (argc < 2)
 	{
 		fprintf(stderr, "%s: ringbuffersize must be specified\n", program_name);
-		usage(program_name);
+		usage();
 		exit(EXIT_FAILURE);
 	}
 
 	/* zu viele Argumente */
 	if (argc > 3) {
-		usage(program_name);
+		usage();
 		exit(EXIT_FAILURE);
 	}
 
@@ -86,7 +86,7 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 				if (errno == ERANGE && (ringbuffer_size == LLONG_MAX || ringbuffer_size == LLONG_MIN))
 				{
 					fprintf(stderr, "%s: numeric overflow when converting ringbuffersize to long long value (value %s exceeds %lld)\n", program_name, optarg, LLONG_MAX);
-			                usage(program_name);
+			                usage();
 					exit(EXIT_FAILURE);
 				}
 				if (errno != 0 && ringbuffer_size == 0)
@@ -96,19 +96,20 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 				}
 				if (*endptr != '\0') {
 					fprintf(stderr, "%s: Cannot parse number \"%s\"after -m\n", program_name, optarg);
-					usage(program_name);
+					usage();
 					exit(EXIT_FAILURE);
 				}
 
 				/* Limits für ringbuffer_size */
 				if (ringbuffer_size < 1 || ringbuffer_size > RINGBUFFER_SIZE_MAX) {
                                         fprintf(stderr, "%s: ringbuffersize must be between 1 and %d (value %lld is not possible)\n", program_name, RINGBUFFER_SIZE_MAX, ringbuffer_size);
-					usage(program_name);
+					usage();
                                         exit(EXIT_FAILURE);
 				}
 
 				break;
 			default:
+				/* wenn error, dann wird er von getopt() ausgegeben -> hier keine Ausgabe erforderlich */
 				exit(EXIT_FAILURE);
 		}
 	}
@@ -123,7 +124,7 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
  * \param program_name name of the program
  *
  */
-static void usage(char* program_name)
+static void usage(void)
 {
     fprintf(stderr, "usage: %s -m <ring buffer size>\n", program_name);
 }
@@ -148,14 +149,14 @@ int get_semid(int initval)
 			semid = semgrab(KEY + count);
 			if(semid == -1)
 			{
-				fprintf(stderr, "%s: %s\n", "PROGRAMMNAME SPETERR ERGAENZEN", strerror(errno));
+				fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
 				/* SEMAPHOREN LOESCHEN */
 				exit(EXIT_FAILURE);
 			}
 		}
 		else
 		{
-			fprintf(stderr, "%s: %s", "PROGRAMMNAME SPAETERR ERGAENZEN", strerror(errno));
+			fprintf(stderr, "%s: %s", program_name, strerror(errno));
 		}
 	}
 
@@ -172,13 +173,16 @@ int get_semid(int initval)
  * \retval id of the created shared memory
  *
  */
-int get_shmid(size_t size)
+int* get_shm(size_t size, int flags)
 {
 	int shmid = 0;
+	int* shm;
 
 	shmid = shmget(KEY, size * sizeof(int), 0660 | IPC_CREAT);
 
-	return shmid;
+	shm = shmat(shmid, NULL, flags);
+
+	return shm;
 }
 /*
  * =================================================================== eof ==
