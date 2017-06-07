@@ -32,6 +32,7 @@ static void usage(void);
  * --------------------------------------------------------------- globals --
  */
 static char* program_name;
+static int shmid;
 
 /**
  *
@@ -175,14 +176,26 @@ int get_semid(int initval)
  */
 int* get_shm(size_t size, int flags)
 {
-	int shmid = 0;
 	int* shm;
 
 	shmid = shmget(KEY, size * sizeof(int), 0660 | IPC_CREAT);
 
-	shm = shmat(shmid, NULL, flags);
+	shm = (int *) shmat(shmid, NULL, flags);
 
 	return shm;
+}
+
+
+
+
+
+
+void shm_del(void) {
+        /* Shared memory löschen - BEACHTEN: Es sollte nur ein Prozeß das Shared Memory Segment entfernen */
+      if (shmctl(shmid, IPC_RMID, NULL) == -1)
+      {
+              fprintf(stderr, "%s: %s\n", "SPAETER DURCH PROGRAMMNAME ERSETZEN", strerror(errno));
+      }
 }
 /*
  * =================================================================== eof ==

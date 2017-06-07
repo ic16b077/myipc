@@ -44,11 +44,44 @@
  *
  */
 int main(int argc, char* argv[]) {
-	long long ringbuffer_size;
+        long long ringbuffer_size;
+        int semid_sender, semid_empfaenger, character;
+        int* shm;
+	int i = 0;
 
-	ringbuffer_size = get_ringbuffer_size(argc, argv);
+        /* Get size of ringbuffer */
+        ringbuffer_size = get_ringbuffer_size(argc, argv);
+        printf("ringbuffer_size = %lld\n", ringbuffer_size);
 
-        printf("%lld\n", ringbuffer_size);
+        /* Semaphores */
+        semid_empfaenger = get_semid(0);
+        printf("semid_empfaenger = %d\n", semid_empfaenger);
+
+        semid_sender = get_semid(ringbuffer_size);
+        printf("semid_sender = %d\n", semid_sender);
+
+        /* Shared memory */
+        shm = get_shm(ringbuffer_size, 0);
+
+	do
+	{
+		P(semid_sender);
+
+		/* Get input */
+        	character = fgetc(stdin);
+
+		/* Process input */
+		shm[i++ % ringbuffer_size] = character;
+
+		V(semid_empfaenger);
+	} while(character != EOF);
+
+        /* Semaphoren löschen */
+        semrm(semid_empfaenger);
+        semrm(semid_sender);
+
+        /* Shared memory löschen */
+	shm_del();
 
 	return EXIT_SUCCESS;
 }

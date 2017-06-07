@@ -44,53 +44,44 @@
  *
  */
 int main(int argc, char* argv[]) {
-	long long ringbuffer_size;
-	int semid_sender;
-	int semid_empfaenger;
-	int* shm;
-	char character;
+        long long ringbuffer_size;
+        int semid_sender, semid_empfaenger, character;
+        int* shm;
+	int i = 0;
 
-	/* Get size of ringbuffer */
-	ringbuffer_size = get_ringbuffer_size(argc, argv);
+        /* Get size of ringbuffer */
+        ringbuffer_size = get_ringbuffer_size(argc, argv);
         printf("ringbuffer_size = %lld\n", ringbuffer_size);
 
-	/* Semaphores */
-	semid_empfaenger = get_semid(0);
-	printf("semid_empfaenger = %d\n", semid_empfaenger);
+        /* Semaphores */
+        semid_empfaenger = get_semid(0);
+        printf("semid_empfaenger = %d\n", semid_empfaenger);
 
         semid_sender = get_semid(ringbuffer_size);
         printf("semid_sender = %d\n", semid_sender);
 
-	/* Shared memory */
-//	shmid = get_shmid(ringbuffer_size);
-//	printf("shmid = %d\n", shmid);
+        /* Shared memory */
+        shm = get_shm(ringbuffer_size, SHM_RDONLY);
 
-	shm = get_shm(ringbuffer_size, SHM_RDONLY);
-do
-{
-	character = fgetc(stdin);
-} while(character != EOF);
+        do
+        {
+                P(semid_empfaenger);
 
-printf("%c",character);
+                /* Get character */
+                character = shm[i++ % ringbuffer_size++];
+		fputc(character, stdout);
 
-shm = shm;
-character = character;
+                V(semid_sender);
+        } while(character != EOF);
 
-//scanf(" %c",&character);
-//printf("%c",character);
+        /* Semaphoren löschen */
+        semrm(semid_empfaenger);
+        semrm(semid_sender);
 
-	/* Semaphoren löschen */
-	semrm(semid_empfaenger);
-	semrm(semid_sender);
+        /* Shared memory löschen */
+        shm_del();
 
-	/* Shared memory löschen - BEACHTEN: Es sollte nur ein Prozeß das Shared Memory Segment entfernen */
-//	if (shmctl(shmid, IPC_RMID, NULL) == -1)
-//	{
-//		fprintf(stderr, "%s: %s\n", "SPAETER DURCH PROGRAMMNAME ERSETZEN", strerror(errno));
-//	}
-
-
-	return EXIT_SUCCESS;
+        return EXIT_SUCCESS;
 }
 
 /*
