@@ -22,6 +22,7 @@
  * -------------------------------------------------------------- includes --
  */
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>

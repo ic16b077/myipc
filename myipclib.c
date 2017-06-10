@@ -20,7 +20,7 @@
 /*
  * --------------------------------------------------------------- defines --
  */
-#define RINGBUFFER_SIZE_MAX 200
+#define RINGBUFFER_SIZE_MAX 1073741823
 #define KEY getuid() * 1000
 
 /*
@@ -47,7 +47,7 @@ static int shmid;
  *
  */
 long long get_ringbuffer_size(int argc, char* argv[]) {
-        int option;
+    int option;
 	long long ringbuffer_size = 0;
 	char* endptr;
 	int base = 10;
@@ -75,7 +75,6 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 		usage();
 		exit(EXIT_FAILURE);
 	}
-
 	/* Optionen verarbeiten */
 	while ((option = getopt(argc, argv, "m:")) != -1)
 	{
@@ -88,12 +87,12 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 				if (errno == ERANGE && (ringbuffer_size == LLONG_MAX || ringbuffer_size == LLONG_MIN))
 				{
 					fprintf(stderr, "%s: numeric overflow when converting ringbuffersize to long long value (value %s exceeds %lld)\n", program_name, optarg, LLONG_MAX);
-			                usage();
+			        usage();
 					exit(EXIT_FAILURE);
 				}
 				if (errno != 0 && ringbuffer_size == 0)
 				{
-                                        error_message(errno);
+                    error_message(errno);
 					exit(EXIT_FAILURE);
 				}
 				if (*endptr != '\0') {
@@ -104,19 +103,29 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 
 				/* Limits für ringbuffer_size */
 				if (ringbuffer_size < 1 || ringbuffer_size > RINGBUFFER_SIZE_MAX) {
-                                        fprintf(stderr, "%s: ringbuffersize must be between 1 and %d (value %lld is not possible)\n", program_name, RINGBUFFER_SIZE_MAX, ringbuffer_size);
+                    fprintf(stderr, "%s: ringbuffersize must be between 1 and %d (value %lld is not possible)\n", program_name, RINGBUFFER_SIZE_MAX, ringbuffer_size);
 					usage();
-                                        exit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
 				}
 
 				break;
-			default:
+			    default:
 				/* wenn error, dann wird er von getopt() ausgegeben -> hier keine Ausgabe erforderlich */
-				exit(EXIT_FAILURE);
+					usage();
+					exit(EXIT_FAILURE);
 		}
 	}
-
-        return ringbuffer_size;
+	/*If there are no more option characters, getopt() returns -1. Then optind is the index in argv of the first argv-element that is not an option. */
+	if (optind < argc) {
+		usage();
+		exit(EXIT_FAILURE);
+	}
+	if (ringbuffer_size <= SIZE_MAX)
+		return ringbuffer_size;
+	else {
+		usage();
+		exit(EXIT_FAILURE);
+	}
 }
 
 /**
