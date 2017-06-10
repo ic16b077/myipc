@@ -27,6 +27,7 @@
  * ------------------------------------------------------------- functions --
  */
 static void usage(void);
+static void error_message(int error_number);
 
 /*
  * --------------------------------------------------------------- globals --
@@ -92,7 +93,7 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 				}
 				if (errno != 0 && ringbuffer_size == 0)
 				{
-                                        fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+                                        error_message(errno);
 					exit(EXIT_FAILURE);
 				}
 				if (*endptr != '\0') {
@@ -122,12 +123,20 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
  *
  * \brief prints usage to stderr
  *
- * \param program_name name of the program
- *
  */
 static void usage(void)
 {
     fprintf(stderr, "usage: %s -m <ring buffer size>\n", program_name);
+}
+
+/**
+ *
+ * \brief prints errno-meassage to stderr
+ *
+ */
+static void error_message(int error_number)
+{
+    fprintf(stderr, "%s: %s\n", program_name, strerror(error_number));
 }
 
 /**
@@ -150,14 +159,14 @@ int get_semid(int initval)
 			semid = semgrab(KEY + count);
 			if(semid == -1)
 			{
-				fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+				error_message(errno);
 				/* SEMAPHOREN LOESCHEN */
 				exit(EXIT_FAILURE);
 			}
 		}
 		else
 		{
-			fprintf(stderr, "%s: %s", program_name, strerror(errno));
+			error_message(errno);
 		}
 	}
 
@@ -191,11 +200,11 @@ int* get_shm(size_t size, int flags)
 
 
 void shm_del(void) {
-        /* Shared memory löschen - BEACHTEN: Es sollte nur ein Prozeß das Shared Memory Segment entfernen */
-      if (shmctl(shmid, IPC_RMID, NULL) == -1)
-      {
-              fprintf(stderr, "%s: %s\n", "SPAETER DURCH PROGRAMMNAME ERSETZEN", strerror(errno));
-      }
+	/* Shared memory löschen - BEACHTEN: Es sollte nur ein Prozeß das Shared Memory Segment entfernen */
+	if (shmctl(shmid, IPC_RMID, NULL) == -1)
+	{
+		error_message(errno);
+	}
 }
 /*
  * =================================================================== eof ==
