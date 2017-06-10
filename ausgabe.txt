@@ -1,0 +1,2 @@
+4294967295  #max. size of size_t (SHMMAX)
+            #Dieser Wert ist aufzufinden unter: /proc/sys/kernel/shmmax  

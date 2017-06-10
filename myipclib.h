@@ -36,7 +36,7 @@
 /*
  * ------------------------------------------------------------- functions --
  */
-extern long long get_ringbuffer_size(int argc, char* argv[]);
+extern size_t get_ringbuffer_size(int argc, char* argv[]);
 extern int get_semid(int initval);
 extern int* get_shm(size_t size, int flags);
 extern void shm_del(void);

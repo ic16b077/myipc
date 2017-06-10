@@ -20,7 +20,6 @@
 /*
  * --------------------------------------------------------------- defines --
  */
-#define RINGBUFFER_SIZE_MAX 1073741823
 #define KEY getuid() * 1000
 
 /*
@@ -46,21 +45,21 @@ static int shmid;
  * \retval between 1 and RINGBUFFER_SIZE_MAX
  *
  */
-long long get_ringbuffer_size(int argc, char* argv[]) {
+size_t get_ringbuffer_size(int argc, char* argv[]) {
     int option;
-	long long ringbuffer_size = 0;
+	size_t ringbuffer_size = 0;
 	char* endptr;
 	int base = 10;
 
 	/* Programmnamen holen */
-        if (argv[0])
-        {
-                program_name = argv[0];
-        }
-	else
-	{
+    if (argv[0])
+     {
+        program_name = argv[0];
+     }
+	   else
+	   {
 		exit(EXIT_FAILURE);
-	}
+	   }
 
 	/* zu wenig Argumente */
 	if (argc < 2)
@@ -81,12 +80,16 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 		switch (option)
 		{
 			case 'm':
-				ringbuffer_size = strtoll(optarg, &endptr, base);
+				 ringbuffer_size = strtol(optarg, &endptr, base);
 
+				if (ringbuffer_size > SIZE_MAX) {
+					fprintf(stderr, "%s: Exceeding max. value SIZE_MAX!\n", program_name);
+					exit(EXIT_FAILURE);
+				}
 				/* Fehlerbehandlung für strtol */
-				if (errno == ERANGE && (ringbuffer_size == LLONG_MAX || ringbuffer_size == LLONG_MIN))
+				if ((errno == ERANGE && ((long)ringbuffer_size == LONG_MAX || (long)ringbuffer_size == LONG_MIN)) || (long)ringbuffer_size < 1)
 				{
-					fprintf(stderr, "%s: numeric overflow when converting ringbuffersize to long long value (value %s exceeds %lld)\n", program_name, optarg, LLONG_MAX);
+					fprintf(stderr, "%s: numeric overflow when converting ringbuffersize to long value (value %s exceeds %ld)\n", program_name, optarg, LONG_MAX);
 			        usage();
 					exit(EXIT_FAILURE);
 				}
@@ -101,13 +104,6 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 					exit(EXIT_FAILURE);
 				}
 
-				/* Limits für ringbuffer_size */
-				if (ringbuffer_size < 1 || ringbuffer_size > RINGBUFFER_SIZE_MAX) {
-                    fprintf(stderr, "%s: ringbuffersize must be between 1 and %d (value %lld is not possible)\n", program_name, RINGBUFFER_SIZE_MAX, ringbuffer_size);
-					usage();
-                    exit(EXIT_FAILURE);
-				}
-
 				break;
 			    default:
 				/* wenn error, dann wird er von getopt() ausgegeben -> hier keine Ausgabe erforderlich */
@@ -120,12 +116,7 @@ long long get_ringbuffer_size(int argc, char* argv[]) {
 		usage();
 		exit(EXIT_FAILURE);
 	}
-	if (ringbuffer_size <= SIZE_MAX)
 		return ringbuffer_size;
-	else {
-		usage();
-		exit(EXIT_FAILURE);
-	}
 }
 
 /**
@@ -196,8 +187,11 @@ int* get_shm(size_t size, int flags)
 {
 	int* shm;
 
-	shmid = shmget(KEY, size * sizeof(int), 0660 | IPC_CREAT);
-
+	shmid = shmget(KEY, size* sizeof(int), 0660 | IPC_CREAT);
+	if (shmid == -1) {
+		error_message(errno);
+		exit(EXIT_FAILURE);
+	}
 	shm = (int *) shmat(shmid, NULL, flags);
 
 	return shm;

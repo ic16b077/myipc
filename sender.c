@@ -44,7 +44,7 @@
  *
  */
 int main(int argc, char* argv[]) {
-        long long ringbuffer_size;
+	    size_t ringbuffer_size;
         int semid_sender, semid_empfaenger, character;
         int* shm;
 	    int i = 0;
