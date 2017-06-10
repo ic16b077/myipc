@@ -69,8 +69,9 @@ int main(int argc, char* argv[]) {
 
                 /* Get character */
                 character = shm[i++ % ringbuffer_size++];
-		fputc(character, stdout);
-
+		if (character != EOF) {
+			fputc(character, stdout);
+		}
                 V(semid_sender);
         } while(character != EOF);
 
