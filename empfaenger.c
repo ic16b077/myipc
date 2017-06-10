@@ -65,13 +65,18 @@ int main(int argc, char* argv[]) {
 
         do
         {
+		/* Wait for signal */
                 P(semid_empfaenger);
 
-                /* Get character */
+                /* Read character from shared memory */
                 character = shm[i++ % ringbuffer_size++];
+
+		/* Output character */
 		if (character != EOF) {
 			fputc(character, stdout);
 		}
+
+		/* Send signal */
                 V(semid_sender);
         } while(character != EOF);
 
