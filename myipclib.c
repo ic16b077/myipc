@@ -82,12 +82,8 @@ size_t get_ringbuffer_size(int argc, char* argv[]) {
 			case 'm':
 				 ringbuffer_size = strtol(optarg, &endptr, base);
 
-				if (ringbuffer_size > SIZE_MAX) {
-					fprintf(stderr, "%s: Exceeding max. value SIZE_MAX!\n", program_name);
-					exit(EXIT_FAILURE);
-				}
 				/* Fehlerbehandlung für strtol */
-				if ((errno == ERANGE && ((long)ringbuffer_size == LONG_MAX || (long)ringbuffer_size == LONG_MIN)) || (long)ringbuffer_size < 1)
+				if (errno == ERANGE && ((long)ringbuffer_size == LONG_MAX || (long)ringbuffer_size == LONG_MIN))
 				{
 					fprintf(stderr, "%s: numeric overflow when converting ringbuffersize to long value (value %s exceeds %ld)\n", program_name, optarg, LONG_MAX);
 			        usage();
@@ -103,7 +99,10 @@ size_t get_ringbuffer_size(int argc, char* argv[]) {
 					usage();
 					exit(EXIT_FAILURE);
 				}
-
+				if (ringbuffer_size < 1 || ringbuffer_size > ULONG_MAX/4) {
+					usage();
+					exit(EXIT_FAILURE);
+				}
 				break;
 			    default:
 				/* wenn error, dann wird er von getopt() ausgegeben -> hier keine Ausgabe erforderlich */
@@ -186,8 +185,14 @@ int get_semid(int initval)
 int* get_shm(size_t size, int flags)
 {
 	int* shm;
+	size_t ringbuffer_size;
+	ringbuffer_size = size * sizeof(int);
 
-	shmid = shmget(KEY, size* sizeof(int), 0660 | IPC_CREAT);
+	if (ringbuffer_size >= SIZE_MAX) {
+		exit(EXIT_FAILURE);
+	}
+
+	shmid = shmget(KEY, ringbuffer_size, 0660 | IPC_CREAT);
 	if (shmid == -1) {
 		error_message(errno);
 		exit(EXIT_FAILURE);
