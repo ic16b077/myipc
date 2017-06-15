@@ -46,8 +46,8 @@
 int main(int argc, char* argv[]) {
 	    size_t ringbuffer_size;
         int semid_sender, semid_empfaenger, character;
-        const int* shm;
-		int i = 0;
+        const int* shmadr;
+	    int i = 0;
 
         /* Get size of ringbuffer */
         ringbuffer_size = get_ringbuffer_size(argc, argv);
@@ -61,42 +61,51 @@ int main(int argc, char* argv[]) {
         //printf("semid_sender = %d\n", semid_sender);
 
         /* Shared memory */
-        shm = get_shm(ringbuffer_size, SHM_RDONLY);
+		shmadr = get_shm(ringbuffer_size, SHM_RDONLY);
 
         do
         {
-			/* Wait for signal */
-			if (P(semid_empfaenger) == -1) {
-				if (errno == EINTR) {
-					continue;
-				}
-				else {
-					fprintf(stderr, "%s: %s\n", argv[0], strerror(errno));
-					/*aufräumen*/
-					exit(EXIT_FAILURE);
-				}
+		/* Wait for signal */
+		if (P(semid_empfaenger) == -1) {
+			if (errno == EINTR) {
+				continue;
 			}
-
-            /* Read character from shared memory */
-            character = shm[i++ % ringbuffer_size];
-
-			/* Output character */
-			if (character != EOF) {
-				fputc(character, stdout);
-			}
-
-			/* Send signal */
-            if(V(semid_sender)== -1)
+			else {
+				fprintf(stderr, "%s: %s\n", argv[0], strerror(errno));
+				remove_all();
 				exit(EXIT_FAILURE);
+			}
+		}
 
+		/* Read character from shared memory */
+		character = shmadr[i++ % ringbuffer_size];
+
+		/* Output character */
+		if (character != EOF) {
+			fputc(character, stdout);
+			//Fehlerbehandlung von fputc
+			if (ferror(stdout)) {
+				fprintf(stderr, "%s: Error writing to stdout.\n", argv[0]);
+				remove_all();
+				exit(EXIT_FAILURE);
+			}
+		}
+
+		/* Send signal */
+		if(V(semid_sender) == -1) {
+			remove_all();
+			exit(EXIT_FAILURE);
+		}
         } while(character != EOF);
 
-        /* Semaphoren löschen */
-        semrm(semid_empfaenger);
-        semrm(semid_sender);
 
-        /* Shared memory löschen */
-        shm_del();
+
+        if (shmdt(shmadr) == -1) {
+	    remove_all();
+        exit(EXIT_FAILURE);
+        }
+
+		remove_all();
 
         return EXIT_SUCCESS;
 }

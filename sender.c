@@ -46,23 +46,22 @@
 int main(int argc, char* argv[]) {
 	    size_t ringbuffer_size;
         int semid_sender, semid_empfaenger, character;
-        int* shm;
+        int* shmadr;
 	    int i = 0;
 
         /* Get size of ringbuffer */
         ringbuffer_size = get_ringbuffer_size(argc, argv);
         //printf("ringbuffer_size = %lld\n", ringbuffer_size);
 
-
         /* Semaphores */
         semid_empfaenger = get_semid(0);
         //printf("semid_empfaenger = %d\n", semid_empfaenger);
 
-        semid_sender = get_semid(ringbuffer_size);
-        //printf("semid_sender = %d\n", semid_sender);
+	    semid_sender = get_semid(ringbuffer_size);
+	    //printf("semid_sender = %d\n", semid_sender);
 
-        /* Shared memory */
-        shm = get_shm(ringbuffer_size, 0);
+	    /* Shared memory */
+		shmadr = get_shm(ringbuffer_size, 0);
 
 	do
 	{
@@ -73,29 +72,35 @@ int main(int argc, char* argv[]) {
 			}
 			else {
 				fprintf(stderr, "%s: %s\n", argv[0], strerror(errno));
-				/*aufräumen*/
+				remove_all();
 				exit(EXIT_FAILURE);
 			}
 		}
 		/* Get input */
         	character = fgetc(stdin);
+			//Fehlerbehandlung von fgetc
+			if (ferror(stdin)) {
+				fprintf(stderr, "%s: Error reading from stdin.\n", argv[0]);
+				remove_all();
+				exit(EXIT_FAILURE);
+			}
 
 		/* Write input to shared memory */
-		shm[i++ % ringbuffer_size] = character;
+		shmadr[i++ % ringbuffer_size] = character;
 
 		/* Send signal */
-		if (V(semid_empfaenger) == -1)
+		if (V(semid_empfaenger) == -1) {
+			remove_all();
 			exit(EXIT_FAILURE);
+		}
 
 	} while(character != EOF);
 
-        /* Semaphoren löschen */
-        semrm(semid_empfaenger);
-        semrm(semid_sender);
-
-        /* Shared memory löschen */
-	shm_del();
-
+	if (shmdt(shmadr) == -1) {
+		// errormessage
+		remove_all();
+		exit(EXIT_FAILURE);
+	}
 	return EXIT_SUCCESS;
 }
 
