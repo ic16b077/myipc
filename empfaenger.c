@@ -44,24 +44,20 @@
  *
  */
 int main(int argc, char* argv[]) {
-	    size_t ringbuffer_size;
+	size_t ringbuffer_size;
         int semid_sender, semid_empfaenger, character;
         const int* shmadr;
-	    int i = 0;
+	int i = 0;
 
         /* Get size of ringbuffer */
         ringbuffer_size = get_ringbuffer_size(argc, argv);
-        //printf("ringbuffer_size = %lld\n", ringbuffer_size);
 
         /* Semaphores */
         semid_empfaenger = get_semid(0);
-        //printf("semid_empfaenger = %d\n", semid_empfaenger);
-
         semid_sender = get_semid(ringbuffer_size);
-        //printf("semid_sender = %d\n", semid_sender);
 
         /* Shared memory */
-		shmadr = get_shm(ringbuffer_size, SHM_RDONLY);
+	shmadr = get_shm(ringbuffer_size, SHM_RDONLY);
 
         do
         {
@@ -98,14 +94,12 @@ int main(int argc, char* argv[]) {
 		}
         } while(character != EOF);
 
-
-
         if (shmdt(shmadr) == -1) {
-	    remove_all();
-        exit(EXIT_FAILURE);
+		remove_all();
+		exit(EXIT_FAILURE);
         }
 
-		remove_all();
+	remove_all();
 
         return EXIT_SUCCESS;
 }

@@ -44,24 +44,20 @@
  *
  */
 int main(int argc, char* argv[]) {
-	    size_t ringbuffer_size;
+	size_t ringbuffer_size;
         int semid_sender, semid_empfaenger, character;
         int* shmadr;
-	    int i = 0;
+	int i = 0;
 
         /* Get size of ringbuffer */
         ringbuffer_size = get_ringbuffer_size(argc, argv);
-        //printf("ringbuffer_size = %lld\n", ringbuffer_size);
 
         /* Semaphores */
         semid_empfaenger = get_semid(0);
-        //printf("semid_empfaenger = %d\n", semid_empfaenger);
+	semid_sender = get_semid(ringbuffer_size);
 
-	    semid_sender = get_semid(ringbuffer_size);
-	    //printf("semid_sender = %d\n", semid_sender);
-
-	    /* Shared memory */
-		shmadr = get_shm(ringbuffer_size, 0);
+	/* Shared memory */
+	shmadr = get_shm(ringbuffer_size, 0);
 
 	do
 	{
@@ -76,9 +72,10 @@ int main(int argc, char* argv[]) {
 				exit(EXIT_FAILURE);
 			}
 		}
+
 		/* Get input */
         	character = fgetc(stdin);
-			//Fehlerbehandlung von fgetc
+			/* Fehlerbehandlung von fgetc */
 			if (ferror(stdin)) {
 				fprintf(stderr, "%s: Error reading from stdin.\n", argv[0]);
 				remove_all();
@@ -93,7 +90,6 @@ int main(int argc, char* argv[]) {
 			remove_all();
 			exit(EXIT_FAILURE);
 		}
-
 	} while(character != EOF);
 
 	if (shmdt(shmadr) == -1) {
@@ -101,6 +97,7 @@ int main(int argc, char* argv[]) {
 		remove_all();
 		exit(EXIT_FAILURE);
 	}
+
 	return EXIT_SUCCESS;
 }
 
