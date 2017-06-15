@@ -75,12 +75,12 @@ int main(int argc, char* argv[]) {
 
 		/* Get input */
         	character = fgetc(stdin);
-			/* Fehlerbehandlung von fgetc */
-			if (ferror(stdin)) {
-				fprintf(stderr, "%s: Error reading from stdin.\n", argv[0]);
-				remove_all();
-				exit(EXIT_FAILURE);
-			}
+		/* Fehlerbehandlung von fgetc */
+		if (ferror(stdin)) {
+			fprintf(stderr, "%s: Error reading from stdin.\n", argv[0]);
+			remove_all();
+			exit(EXIT_FAILURE);
+		}
 
 		/* Write input to shared memory */
 		shmadr[i++ % ringbuffer_size] = character;
