@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 	} while(character != EOF);
 
 	if (shmdt(shmadr) == -1) {
-		fprintf(stderr; "%s: Shared memory could not be detached", argv[0]);
+		fprintf(stderr, "%s: Shared memory could not be detached\n", argv[0]);
 		remove_all();
 		exit(EXIT_FAILURE);
 	}
