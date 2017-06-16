@@ -45,18 +45,18 @@
  */
 int main(int argc, char* argv[]) {
 	size_t ringbuffer_size;
-        int semid_sender, semid_empfaenger, character;
-        int* shmadr;
+	int semid_sender, semid_empfaenger, character;
+	int* shmadr;
 	int i = 0;
 
-        /* Get size of ringbuffer */
-        ringbuffer_size = get_ringbuffer_size(argc, argv);
+	ringbuffer_size = get_ringbuffer_size(argc, argv);
 
-        /* Semaphores */
-        semid_empfaenger = get_semid(0);
+	semid_empfaenger = get_semid(0);
 	semid_sender = get_semid(ringbuffer_size);
 
-	/* Shared memory */
+	/* Attaching the shared memory to the process's virtual memory
+	 * The sender is authorized for read-write
+	 */
 	shmadr = get_shm(ringbuffer_size, 0);
 
 	do
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 
 		/* Get input */
         	character = fgetc(stdin);
-		/* Fehlerbehandlung von fgetc */
+		/* Error handling of fgetc() */
 		if (ferror(stdin)) {
 			fprintf(stderr, "%s: Error reading from stdin.\n", argv[0]);
 			remove_all();
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 	} while(character != EOF);
 
 	if (shmdt(shmadr) == -1) {
-		// errormessage
+		fprintf(stderr; "%s: Shared memory could not be detached", argv[0]);
 		remove_all();
 		exit(EXIT_FAILURE);
 	}

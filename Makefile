@@ -18,8 +18,6 @@
 ##
 
 CC=gcc52
-#MICHI ZUM TESTEN, DA ZUHAUSE KEIN gcc52
-#CC=gcc
 CFLAGS=-DDEBUG -Wall -Werror -Wextra -Wstrict-prototypes -pedantic -fno-common -O3 -g -std=gnu11
 CP=cp
 CD=cd
